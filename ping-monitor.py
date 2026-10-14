@@ -1,0 +1,100 @@
+import subprocess
+import time
+import platform
+import os
+import sys
+from pathlib import Path
+
+try:
+    from plyer import notification
+except ImportError:
+    notification = None
+
+#so here you can either manually paste in the path to the target file everytime you start the script
+username_path = str(input("paste the path where your targets.txt file wil be"))
+
+if username:
+    TARGET_FILE = f'''{username_path}/targets.txt'''
+else:
+    #or you can modify the script directly to include the path and just delete the above if statement
+    TARGET_FILE = "C:/Users/DarrenSmart/targets.txt"
+
+
+def load_targets():
+    path = Path(TARGET_FILE)
+    path.touch(exist_ok=True)
+    targets = {}
+    with open(path, "r") as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split(",")
+                if len(parts) == 2:
+                    name, ip = parts
+                    targets[name.strip()] = ip.strip()
+    return targets
+
+
+def save_target(name, ip):
+    with open(TARGET_FILE, "a") as f:
+        f.write(f"{name},{ip}\n")
+
+
+def is_online(host):
+    param = "-n" if platform.system().lower() == "windows" else "-c"
+    try:
+        subprocess.check_output(["ping", param, "1", host], stderr=subprocess.DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def send_notification(title, message):
+    system = platform.system().lower()
+    if system == "linux":
+        os.system(f'notify-send "{title}" "{message}"')
+    elif system == "darwin":
+        os.system(f'''osascript -e 'display notification "{message}" with title "{title}"' ''')
+    elif system == "windows" and notification:
+        notification.notify(title=title, message=message, timeout=5)
+    else:
+        print(f"[!] {message}")
+
+
+def add_target_interactively():
+    print("\nAdd new targets (type 'done' to finish):")
+    while True:
+        name = input("Name: ").strip()
+        if name.lower() == "done":
+            break
+        ip = input("IP/Hostname: ").strip()
+        if ip.lower() == "done":
+            break
+        save_target(name, ip)
+        print(f"Added: {name} -> {ip}")
+
+
+def run_monitor():
+    print("Monitoring started. Press Ctrl+C to stop.")
+    targets = load_targets()
+    status = {name: False for name in targets}
+
+    try:
+        while True:
+            targets = load_targets()
+            for name, ip in targets.items():
+                online = is_online(ip)
+                if online and not status.get(name, False):
+                    message = f"{name} ({ip}) is ONLINE!"
+                    print(f"[+] {message}")
+                    send_notification("Host Online", message)
+                status[name] = online
+            time.sleep(5)
+    except KeyboardInterrupt:
+        print("\nMonitoring stopped.")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "add":
+        add_target_interactively()
+    else:
+        run_monitor()
