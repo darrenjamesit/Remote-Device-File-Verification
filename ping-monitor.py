@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 from plyer import notification
+#oh wait you will actually need to install plyer first
 
 #so here you can either manually paste in the path to the target file everytime you start the script
 username_path = str(input("paste the path where your targets.txt file wil be"))
