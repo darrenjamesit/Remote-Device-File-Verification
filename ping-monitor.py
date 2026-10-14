@@ -44,6 +44,9 @@ def is_online(host):
         return True
     except subprocess.CalledProcessError:
         return False
+    except Exception as e:
+        print(f"error: {e}")
+        return False
 
 
 #this part makes the windows hello notification
