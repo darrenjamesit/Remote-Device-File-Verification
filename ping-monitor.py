@@ -13,7 +13,7 @@ except ImportError:
     from plyer import notification
 
 #so here you can either manually paste in the path to the target file everytime you start the script
-username_path = str(input("paste the path where your targets.txt file wil be"))
+username_path = str(input("paste the path where your targets.txt file wil be or just press enter if you have hardcoded the path"))
 
 if username:
     TARGET_FILE = f'''{username_path}/targets.txt'''
