@@ -4,6 +4,7 @@ import platform
 import os
 import sys
 from pathlib import Path
+import smtplib, ssl
 
 #oh wait you will actually need to install plyer first
 try:
@@ -11,6 +12,14 @@ try:
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "plyer"])
     from plyer import notification
+
+#boilerplate for setting up email server
+port = 465  # For SSL
+smtp_server = "smtp.gmail.com"
+#i made another email here that I didn't mind giving the password for to my colleagues
+sender_email = "sender_email@gamil.com"
+#put your email address here where you want to receive the notification that the device is online:
+receiver_email = "receiver_email@gmail.com"
 
 #so here you can either manually paste in the path to the target file everytime you start the script
 username_path = str(input("paste the path where your targets.txt file wil be or just press enter if you have hardcoded the path"))
@@ -54,22 +63,56 @@ def send_notification(title, message):
     notification.notify(title=title, message=message, timeout=5)
 
 
-#main function that actually does all the stuff
+#main function that actually does all the stuff, it also opens the email server and closes it after sending the message
 def run_monitor():
-    print("Monitoring started. Press Ctrl+C to stop.")
+    timey_whimey = datetime.datetime.now().replace(microsecond=0)
+    print(f'\nMonitoring started at {timey_whimey}.')
     targets = load_targets()
     status = {name: False for name in targets}
-
+    print("\nAttempting to connect to:\n")
+    i = 1
+    for key, value in targets.items():
+        print(f'{i}.  {key}:  {value} (is not online)')
+        i += 1
+    # i = len(targets)
     while True:
         targets = load_targets()
         for name, ip in targets.items():
             online = is_online(ip)
             if online and not status.get(name, False):
-                message = f"{name} ({ip}) is ONLINE!"
-                print(f"[+] {message}")
-                send_notification("Host Online", message)
-            status[name] = online
+                msg = f"{name} ({ip}) is ONLINE!"
+                current_time = datetime.datetime.now()
+                time_str = current_time.strftime("%H:%M")
+                print(f"\n[+] {msg} at {time_str}\n")
+
+                #here the email server connection opens
+                #you can customise this message however you want, the email will have no subject when you receive it but for some reason you cannot delete the "Subject" part
+                message = f"""\
+                From: {sender_email}
+                To: {receiver_email}
+                Subject: Device {name} Online!
+            
+                --------------------------------------------------------------------------------
+            
+                Guten tag!
+            
+                The device {name} is online now at {time_str}.
+                    
+                Hostname: {ip}
+            
+                Sent from Python :)"""
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                    server.login(sender_email, password)
+                    server.sendmail(sender_email, receiver_email, message)
+                    #closes the email server
+
+                #invokes windows hello
+                send_notification("Host Online", msg)
+            status[name] = 'online'
         time.sleep(5)
+
+
 
 
 if __name__ == "__main__":
