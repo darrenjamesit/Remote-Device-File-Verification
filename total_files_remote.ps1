@@ -4,7 +4,7 @@ $device = Read-Host "enter the hostname here, it's best if you use the FQHN"
 #modified to not need to modify the script with the username and device name but rather input them when running the script
 
 #run the script with: 
-#.\\script.ps1 -user "abc" -device "123.host.com"
+#.\\total_files_remote.ps1 -user "abc" -device "123.host.com"
 
 $extensions = @(
     #put all the extensions you want to count here
