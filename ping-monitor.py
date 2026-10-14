@@ -18,6 +18,8 @@ port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
 #i made another email here that I didn't mind giving the password for to my colleagues
 sender_email = "sender_email@gamil.com"
+#i made the password part be an input rather than hardcoded so I don't put the password here in plaintext
+password = input("Type your password and press enter: ")
 #put your email address here where you want to receive the notification that the device is online:
 receiver_email = "receiver_email@gmail.com"
 
