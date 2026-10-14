@@ -36,6 +36,7 @@ def load_targets():
     return targets
 
 
+#pings the devices
 def is_online(host):
     param = "-n" if platform.system().lower() == "windows" else "-c"
     try:
@@ -50,37 +51,22 @@ def send_notification(title, message):
     notification.notify(title=title, message=message, timeout=5)
 
 
-def add_target_interactively():
-    print("\nAdd new targets (type 'done' to finish):")
-    while True:
-        name = input("Name: ").strip()
-        if name.lower() == "done":
-            break
-        ip = input("IP/Hostname: ").strip()
-        if ip.lower() == "done":
-            break
-        save_target(name, ip)
-        print(f"Added: {name} -> {ip}")
-
-
+#main function that actually does all the stuff
 def run_monitor():
     print("Monitoring started. Press Ctrl+C to stop.")
     targets = load_targets()
     status = {name: False for name in targets}
 
-    try:
-        while True:
-            targets = load_targets()
-            for name, ip in targets.items():
-                online = is_online(ip)
-                if online and not status.get(name, False):
-                    message = f"{name} ({ip}) is ONLINE!"
-                    print(f"[+] {message}")
-                    send_notification("Host Online", message)
-                status[name] = online
-            time.sleep(5)
-    except KeyboardInterrupt:
-        print("\nMonitoring stopped.")
+    while True:
+        targets = load_targets()
+        for name, ip in targets.items():
+            online = is_online(ip)
+            if online and not status.get(name, False):
+                message = f"{name} ({ip}) is ONLINE!"
+                print(f"[+] {message}")
+                send_notification("Host Online", message)
+            status[name] = online
+        time.sleep(5)
 
 
 if __name__ == "__main__":
