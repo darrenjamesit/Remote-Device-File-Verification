@@ -4,11 +4,7 @@ import platform
 import os
 import sys
 from pathlib import Path
-
-try:
-    from plyer import notification
-except ImportError:
-    notification = None
+from plyer import notification
 
 #so here you can either manually paste in the path to the target file everytime you start the script
 username_path = str(input("paste the path where your targets.txt file wil be"))
@@ -48,16 +44,9 @@ def is_online(host):
         return False
 
 
+#this part makes the windows hello notification
 def send_notification(title, message):
-    system = platform.system().lower()
-    if system == "linux":
-        os.system(f'notify-send "{title}" "{message}"')
-    elif system == "darwin":
-        os.system(f'''osascript -e 'display notification "{message}" with title "{title}"' ''')
-    elif system == "windows" and notification:
-        notification.notify(title=title, message=message, timeout=5)
-    else:
-        print(f"[!] {message}")
+    notification.notify(title=title, message=message, timeout=5)
 
 
 def add_target_interactively():
