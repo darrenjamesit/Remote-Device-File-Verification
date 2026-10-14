@@ -4,8 +4,13 @@ import platform
 import os
 import sys
 from pathlib import Path
-from plyer import notification
+
 #oh wait you will actually need to install plyer first
+try:
+    from plyer import notification
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "plyer"])
+    from plyer import notification
 
 #so here you can either manually paste in the path to the target file everytime you start the script
 username_path = str(input("paste the path where your targets.txt file wil be"))
